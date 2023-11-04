@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="stylesheet" href="./style.css" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script type="module" src="./script.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>WTech</title>
+  </head>
+  <body>
+    <link
+      href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+      rel="stylesheet"
+    />
+    <div id="login" class="container">
+      <div class="row-fluid">
+        <div class="span12">
+          <div class="login well well-small">
+            <div class="center">
+              <img
+                src="http://cataas.com/cat/says/sign%20up%20meow%20:3?type=square"
+                alt="logo"
+              />
+            </div>
+            <form class="login-form" id="UserLoginForm" accept-charset="utf-8">
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-user"></i></span>
+                  <input
+                    name="data[User][email]"
+                    required="required"
+                    placeholder="Email"
+                    maxlength="255"
+                    type="text"
+                    id="UserEmail"
+                  />
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][password]"
+                    required="required"
+                    placeholder="Password"
+                    type="password"
+                    id="UserPassword"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][firstname]"
+                    required="required"
+                    placeholder="First name"
+                    type="text"
+                    id="UserFirstName"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][lastname]"
+                    required="required"
+                    placeholder="Last Name"
+                    type="text"
+                    id="UserLastName"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][password_hint]"
+                    required="required"
+                    placeholder="Password Hint"
+                    type="text"
+                    id="UserPasswordHint"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][secret_question]"
+                    required="required"
+                    placeholder="Secret Question"
+                    type="text"
+                    id="UserSecretQuestion"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][secret_answer]"
+                    required="required"
+                    placeholder="Secret Answer"
+                    type="text"
+                    id="UserSecretAnswer"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][country]"
+                    required="required"
+                    placeholder="Country"
+                    type="text"
+                    id="UserCountry"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][address]"
+                    required="required"
+                    placeholder="Address"
+                    type="text"
+                    id="UserAddress"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][city]"
+                    required="required"
+                    placeholder="City"
+                    type="text"
+                    id="UserCity"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][state]"
+                    required="required"
+                    placeholder="State"
+                    type="text"
+                    id="UserState"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input
+                    name="data[User][zip]"
+                    required="required"
+                    placeholder="Zip"
+                    type="text"
+                    id="UserZip"
+                  />
+                </div>
+              </div>
+
+              <div class="control-group">
+                <input
+                  class="btn btn-primary btn-large btn-block"
+                  type="submit"
+                  value="Sign up"
+                />
+              </div>
+
+              <!-- Message -->
+              <div id="message"></div>
+            </form>
+          </div>
+          <!--/.login-->
+        </div>
+        <!--/.span12-->
+      </div>
+      <!--/.row-fluid-->
+    </div>
+
+    <script type="module" defer>
+      import md5 from "https://cdn.jsdelivr.net/npm/md5@2.3.0/+esm";
+
+      // Note how the validation is only present on the frontend
+      async function onSubmit(event) {
+        event.preventDefault();
+        const messageElement = document.querySelector("#message");
+        const email = document.querySelector("#UserEmail").value;
+        const password = document.querySelector("#UserPassword").value;
+        const firstName = document.querySelector("#UserFirstName").value;
+        const lastName = document.querySelector("#UserLastName").value;
+        const passwordHint = document.querySelector("#UserPasswordHint").value;
+        const secretQuestion = document.querySelector(
+          "#UserSecretQuestion"
+        ).value;
+        const secretAnswer = document.querySelector("#UserSecretAnswer").value;
+        const country = document.querySelector("#UserCountry").value;
+        const address = document.querySelector("#UserAddress").value;
+        const city = document.querySelector("#UserCity").value;
+        const state = document.querySelector("#UserState").value;
+        const zip = document.querySelector("#UserZip").value;
+
+        if (
+          !email ||
+          !password ||
+          !firstName ||
+          !lastName ||
+          !passwordHint ||
+          !secretQuestion ||
+          !secretAnswer ||
+          !country ||
+          !address ||
+          !city ||
+          !state ||
+          !zip
+        ) {
+          alert("All fields are required");
+          return;
+        }
+
+        if (email.length < 3) {
+          alert("Username must be at least 3 characters");
+          return;
+        }
+
+        if (password.length < 8) {
+          alert("Password must be at least 8 characters");
+          return;
+        }
+
+        messageElement.innerHTML = "Loading...";
+
+        const registrationUrl = window.location.href;
+        const clientLocation = 'Narnia'; // Placeholder
+
+        const res = await fetch("/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            // Note the lack of encryption on the password
+            email, password, firstName, lastName, passwordHint, secretQuestion,
+            secretAnswer, clientLocation, registrationUrl, country, address, city, state,
+            zip 
+          }),
+          redirect: "manual",
+        });
+        messageElement.innerHTML = "";
+        const message = await res.text();
+
+        if (res.status !== 200 && res.status !== 201) {
+          messageElement.style.color = 'red';
+          messageElement.innerHTML = message;
+          setTimeout(() => {
+            messageElement.innerHTML = '';
+          }, 3000);
+          return;
+        }
+        
+        messageElement.style.color = 'green';
+        messageElement.innerHTML = 'Success! You will be redirected.';
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 1000);
+      }
+
+      document
+        .querySelector("#UserLoginForm")
+        .addEventListener("submit", onSubmit);
+    </script>
+  </body>
+</html>

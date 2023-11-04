@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: vtech
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  app:
+    build: ./app
+    ports:
+      - "3030:3030"
+    depends_on:
+      - db
+
+  # web:
+  #   image: nginx
+  #   volumes:
+  #     - ./frontend:/usr/share/nginx/html
+  #   ports:
+  #     - "8080:80"

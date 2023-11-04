@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WTech</title>
+    <script>
+      window.addEventListener("DOMContentLoaded",async () => {
+        const res = await fetch("/signout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.status !== 200) {
+          console.error(res);
+        }
+        window.location.href = "/login.html";
+      });
+    </script>
+  </head>
+  <body></body>
+</html>
