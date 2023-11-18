@@ -8,6 +8,7 @@
 
 import express, { Request, Response } from 'express';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import mysql from 'mysql2/promise';
 import path from 'path';
 import md5 from 'md5';
@@ -24,7 +25,7 @@ const connection = mysql.createPool({
 });
 
 type User = {
-  id: string;
+  id: number;
   email: string;
 };
 
@@ -36,11 +37,13 @@ declare module "express-session" {
   }
 }
 
-
+app.use(cookieParser());
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 // JSON middleware
 app.use(express.json());
+// Form data middleware
+app.use(express.urlencoded({ extended: true }));
 // Session middleware
 app.use(session({
   'secret': 'secret',
@@ -48,6 +51,24 @@ app.use(session({
   'saveUninitialized': true
 }));
 
+async function getUserId(email: string): Promise<number | null> {
+  const idQuery = await connection.query('SELECT id FROM Parents WHERE email = ?', [email]) as any;
+    const id = idQuery[0][0].id;
+  return id;
+}
+
+/**
+ * This route will return the session data for the current user.
+ * This is a security flaw because it allows an attacker to get
+ * the session data for any user. This is a problem because the
+ * session data contains the user's ID, which can be used to
+ * impersonate the user.
+ * 
+ * (I mostly set up the route this way for simplicity, not sure
+ * if VTech actually had this vulnerability)
+ * 
+ * @returns {{ signedIn: boolean, user: User}} The session data for the current user
+ */
 app.get('/session', (req: Request, res: Response) => {
   res.send(req.session);
 });
@@ -58,7 +79,6 @@ app.get('/session', (req: Request, res: Response) => {
  * and a reflection of the 2015 insecure setup of the VTech database.
  */
 app.post('/getKids', async (req: Request, res: Response) => {
-  console.log(req.body);
   const { id } = req.body;
   try {
     const [rows] = await connection.query('SELECT * FROM Children WHERE parent_id = ?', [id]);
@@ -81,7 +101,6 @@ app.post('/getParent', async (req: Request, res: Response) => {
     res.status(500).send(err);
   }
 });
-
 /**
  * Attempts to sign the user in. The password is stored with an insecure
  * hash function (MD5) and is not salted. This means that the password
@@ -90,8 +109,6 @@ app.post('/getParent', async (req: Request, res: Response) => {
 app.post('/signin', async (req: Request, res: Response) => {
   const { email, password, rememberMe } = req.body;
   const ip = req.ip;
-
-
   if (!email || !password) {
     res.status(400).send('Missing email or password');
     return;
@@ -102,19 +119,18 @@ app.post('/signin', async (req: Request, res: Response) => {
   try {
     // This is purposefully built with a SQL injection vulnerability
     const [rows] = await connection.query(
-      `SELECT * FROM Parents WHERE email = "${email}" AND encrypted_password = "${password}"`,
+      `SELECT * FROM Parents WHERE email = "${email}" AND encrypted_password = "${md5(password)}"`,
     ) as any[]; // lmao
 
     if (rows.length === 0) {
       // Yes, VTech actually returned the SQL query in the response for errors
-      res.status(401).send(`Invalid email or passwordSELECT * FROM Parents WHERE email = "${email}" AND encrypted_password = "${password}"`);
+      res.status(401).send(`Invalid email or passwordSELECT * FROM Parents WHERE email = "${email}" AND encrypted_password = "${md5(password)}"`);
       return;
     }
 
     // Update the user's last login time (DATETIME), IP address, and login count.
     await connection.execute(
-      'UPDATE Parents SET last_login = NOW(), client_ip = ?, login_count = login_count + 1 WHERE id = ?',
-      [ip, rows[0].id]
+      `UPDATE Parents SET last_login = NOW(), client_ip = "${ip}", login_count = login_count + 1 WHERE id = ${rows[0].id}`
     );
     
     // Set the user's session
@@ -123,6 +139,8 @@ app.post('/signin', async (req: Request, res: Response) => {
       id: rows[0].id,
       email: rows[0].email
     };
+
+    console.log(`User ${email} signed in successfully`);
 
     res.status(200).send('Signed in successfully');
   } catch (err) {
@@ -134,7 +152,6 @@ app.post('/signin', async (req: Request, res: Response) => {
 });
 
 app.post('/signup', async (req: Request, res: Response) => {
-  console.log('signup');
   const {
     email,
     password,
@@ -152,15 +169,17 @@ app.post('/signup', async (req: Request, res: Response) => {
     zip
   } = req.body;
 
-  console.log(req.body);
-
   const encryptedPassword = md5(password);
 
   try {
-    console.log(0);
     const [rows] = await connection.query('SELECT * FROM Parents');
-    console.log(rows);
-    console.log(1);
+
+    // Check if the email is already taken
+    // For simplicity I'm just using any here
+    if ((rows as any).some((row: any) => row.email === email)) {
+      res.status(400).json({ message: 'Email already taken' });
+      return;
+    }
 
     const [result] = await connection.execute(
       `INSERT INTO Parents (
@@ -202,13 +221,19 @@ app.post('/signup', async (req: Request, res: Response) => {
         zip
       ]
     ) as any;
-    console.log(2);
+
+    // Get the id of the account we just created
+    const id = await getUserId(email);
+    console.log(`Created parent with ID ${id} and email ${email}`);
+    if (!id) {
+      throw new Error('Could not find the parent we just created');
+    }
 
     // Set the user's session
     req.session.signedIn = true;
     req.session.user = {
-      id: result.id,
-      email: result.email
+      id,
+      email
     };
 
     res.status(200).json({ message: 'Parent created successfully' });
@@ -229,7 +254,7 @@ app.post('/signout', (req: Request, res: Response) => {
   });
 });
 
-app.post('/add_child', async (req: Request, res: Response) => {
+app.post('/addchild', async (req: Request, res: Response) => {
   // Check if there is a valid session attached to the request
 
   // NOTE: This is commented out mainly because I needed this to be ready for my talk.
@@ -243,11 +268,12 @@ app.post('/add_child', async (req: Request, res: Response) => {
 
   // Insert the child data into the database
   try {
+    // Note the SQL Injection vulnerability here
     const [result] = await connection.execute(
-      'INSERT INTO Children (username, domain, ll_child_id, ll_parent_id, parent_id, country_lang, create_datetime, expired_datetime) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [username, domain, ll_child_id, ll_parent_id, parent_id, country_lang]
+      `INSERT INTO Children (username, domain, ll_child_id, ll_parent_id, parent_id, country_lang, create_datetime) VALUES ("${username}", "${domain}", ${ll_child_id}, ${ll_parent_id}, ${parent_id}, "${country_lang}", NOW())`
     ) as any;
     const insertedId = result.id;
+    console.log(`Child with ID ${insertedId} added to parent with ID ${parent_id}`);
     res.status(201).send(`Child with ID ${insertedId} created`);
   } catch (error) {
     console.error(error);

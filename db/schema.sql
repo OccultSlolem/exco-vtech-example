@@ -54,3 +54,16 @@ CREATE TABLE IF NOT EXISTS `vtech`.`Children` (
   FOREIGN KEY (parent_id) REFERENCES Parents(id)
 )
 ENGINE = InnoDB;
+
+DROP TABLE IF EXISTS `vtech`.`remember_tokens`;
+
+CREATE TABLE IF NOT EXISTS `vtech`.`RememberTokens` (
+  id INT AUTO_INCREMENT,
+  parent_id INT,
+  token VARCHAR(255),
+  max_age INT,
+  created_at DATETIME,
+  PRIMARY KEY (id),
+  FOREIGN KEY (parent_id) REFERENCES Parents(id)
+)
+ENGINE = InnoDB;

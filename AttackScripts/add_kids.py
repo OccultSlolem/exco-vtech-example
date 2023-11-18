@@ -1,5 +1,6 @@
 # Makes kids ( ͡° ͜ʖ ͡°)
 import requests
+import json
 
 RANGE = 1
 KIDS_PER_PARENT = 1
@@ -9,16 +10,16 @@ def main():
         try:
             for c in range(KIDS_PER_PARENT):
                 data = {
-                    'username': "kid" + str(c),
-                    'domain': 'localhost:3030',
-                    'll_child_id': c,
-                    'll_parent_id': p,
-                    'parent_id': p,
-                    'county_lang': 'en',
+                    "username": "kid" + str(c),
+                    "domain": "localhost",
+                    "ll_child_id": c + 1,
+                    "ll_parent_id": p + 1,
+                    "parent_id": p + 1,
+                    "country_lang": "en",
                 }
-                print(data)
-                res = requests.post('http://localhost:3030/add_child', json=data)
-                print("Added kid " + str(c) + " to parent " + str(p) + " with status code " + str(res.status_code))
+
+                res = requests.post("http://localhost:3030/addchild", json=data)
+                print("Added kid " + str(c + 1) + " to parent " + str(p + 1) + " with status code " + str(res.status_code))
         except:
             print("Failed to add kid to parent " + str(p))
             continue

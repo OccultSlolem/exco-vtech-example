@@ -94,11 +94,14 @@
           <h1>Welcome</h1>
           <p class="user-info">
           </p>
+          <p class="user-id">
+          </p>
           <hr />
           <button onclick="getKids()">Get Kids</button>
-          <a href="/add-kid.html">Add Kid</a>
-          <h3>Test</h3>
-          <p>Lorem ipsum...</p>
+          <button onclick="addKid()">Add Kid</button>
+          <ul id="KidInfo"></ul>
+          <h3>The Dashboard</h3>
+          <p>Welcome to your WTech profile! Click Add Kid to add a child or Get Kids to list the children on your account.</p>
         </div>
         <div class="col-sm-2 sidenav">
           <div class="well">
@@ -114,11 +117,19 @@
     <footer class="container-fluid text-center">
       <p>Footer Text</p>
     </footer>
-
     <script defer>
-      let user;
+      /**
+       * Gets the currently signed in user data, or null if not signed in
+       * @returns {Promise<{ {signedIn: boolean, user: { id: number, email: string }} | null }>}
+       */
+       async function getSessionData() {
+        const res = await fetch('/session');
+        const data = await res.json();
+        return data;
+      }
 
       async function getKids() {
+        const { user } = await getSessionData();
         const res = await fetch(
           '/getKids',
           {
@@ -133,25 +144,61 @@
 
         console.log(data);
 
-        if (data.kids) {
-          document.querySelector('.user-info').innerHTML = `
-            <p>Kids: ${data.kids}</p>
-          `;
+        if (data) {
+          document.getElementById('KidInfo').innerHTML = 
+            data.map(kid => `<li>${kid.username}</li>`).join('')
         }
       }
 
+      /**
+       * Adds a child to the signed in user
+       */
+      async function addKid() {
+        const name = prompt('Enter a name for the child');
+        if (!name) return;
+
+        const { user } = await getSessionData();
+        const res = await fetch(
+          '/addchild',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              username: name,
+              domain: window.location.href,
+              ll_child_id: 1,
+              ll_parent_id: user.id,
+              parent_id: user.id,
+              country_lang: 'en-US',
+            })
+          }
+        )
+
+        if (res.status !== 201) {
+          console.error(res);
+          return;
+        }
+
+        alert('Created!');
+      }
+
+      /**
+       * Retrieves the session data and redirects to login if not logged in
+       */
       window.addEventListener('DOMContentLoaded', async () => {
-        const res = await fetch('/session');
-        const data = await res.json();
+        const data = await getSessionData();
   
         if (!data.user) {
           window.location.href = '/login.html';
         }
   
-        user = data.user;
-  
         document.querySelector('.user-info').innerHTML = `
           <p>Email: ${data.user.email}</p>
+        `;
+        document.querySelector('.user-id').innerHTML = `
+          <p>ID: ${data.user.id}</p>
         `;
 
       });

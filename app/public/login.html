@@ -29,12 +29,14 @@
               class="login-form"
               id="UserLoginForm"
               accept-charset="utf-8"
+              action="/signin"
+              method="POST"
             >
               <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-user"></i></span>
                   <input
-                    name="data[User][email]"
+                    name="email"
                     required="required"
                     placeholder="Email"
                     maxlength="255"
@@ -47,7 +49,7 @@
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][password]"
+                    name="password"
                     required="required"
                     placeholder="Password"
                     type="password"
@@ -59,7 +61,7 @@
                 <label id="remember-me">
                   <input
                     type="checkbox"
-                    name="data[User][remember_me]"
+                    name="rememberMe"
                     value="1"
                     id="UserRememberMe"
                   />
@@ -77,6 +79,8 @@
               <!-- Message -->
               <div id="message"></div>
             </form>
+
+            <p>Don't have an account? <a href="/signup.html">Signup</a></p>
           </div>
           <!--/.login-->
         </div>
@@ -86,8 +90,6 @@
     </div>
 
     <script type="module" defer>
-      import md5 from 'https://cdn.jsdelivr.net/npm/md5@2.3.0/+esm';
-
       // Note how the validation is only present on the frontend
       async function onSubmit(event) {
         event.preventDefault();
@@ -117,19 +119,23 @@
         }
 
         messageElement.innerHTML = "Loading...";
-        
-        const passwordHash = md5(password);
-        console.log(passwordHash);
 
+        const formData = new FormData(document.querySelector("#UserLoginForm"));
+
+        // Convert FormData into a URL-encoded string
+        const formBody = new URLSearchParams();
+        for (const [key, value] of formData) {
+          formBody.append(key, value);
+        }
 
         const res = await fetch('/signin', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: JSON.stringify({ email, password: passwordHash, rememberMe }),
+          body: formBody,
           redirect: 'manual'
-        })
+        });
         messageElement.innerHTML = '';
         const data = await res.text();
 

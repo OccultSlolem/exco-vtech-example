@@ -25,12 +25,18 @@
                 alt="logo"
               />
             </div>
-            <form class="login-form" id="UserLoginForm" accept-charset="utf-8">
+            <form
+              class="login-form"
+              id="UserSignupForm"
+              accept-charset="utf-8"
+              action="/signup"
+              method="POST"
+            >
               <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-user"></i></span>
                   <input
-                    name="data[User][email]"
+                    name="email"
                     required="required"
                     placeholder="Email"
                     maxlength="255"
@@ -38,151 +44,117 @@
                     id="UserEmail"
                   />
                 </div>
-              </div>
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][password]"
+                    name="password"
                     required="required"
                     placeholder="Password"
                     type="password"
                     id="UserPassword"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][firstname]"
+                    name="firstName"
                     required="required"
                     placeholder="First name"
                     type="text"
                     id="UserFirstName"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][lastname]"
+                    name="lastName"
                     required="required"
                     placeholder="Last Name"
                     type="text"
                     id="UserLastName"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][password_hint]"
+                    name="passwordHint"
                     required="required"
                     placeholder="Password Hint"
                     type="text"
                     id="UserPasswordHint"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][secret_question]"
+                    name="secretQuestion"
                     required="required"
                     placeholder="Secret Question"
                     type="text"
                     id="UserSecretQuestion"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][secret_answer]"
+                    name="secretAnswer"
                     required="required"
                     placeholder="Secret Answer"
                     type="text"
                     id="UserSecretAnswer"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][country]"
+                    name="country"
                     required="required"
                     placeholder="Country"
                     type="text"
                     id="UserCountry"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][address]"
+                    name="address"
                     required="required"
                     placeholder="Address"
                     type="text"
                     id="UserAddress"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][city]"
+                    name="city"
                     required="required"
                     placeholder="City"
                     type="text"
                     id="UserCity"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][state]"
+                    name="state"
                     required="required"
                     placeholder="State"
                     type="text"
                     id="UserState"
                   />
                 </div>
-              </div>
-
-              <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-lock"></i></span>
                   <input
-                    name="data[User][zip]"
+                    name="zip"
                     required="required"
                     placeholder="Zip"
                     type="text"
                     id="UserZip"
                   />
                 </div>
-              </div>
 
-              <div class="control-group">
                 <input
                   class="btn btn-primary btn-large btn-block"
                   type="submit"
@@ -193,6 +165,7 @@
               <!-- Message -->
               <div id="message"></div>
             </form>
+            <p>Already have an account? <a href="/login.html">Login</a></p>
           </div>
           <!--/.login-->
         </div>
@@ -202,20 +175,18 @@
     </div>
 
     <script type="module" defer>
-      import md5 from "https://cdn.jsdelivr.net/npm/md5@2.3.0/+esm";
-
       // Note how the validation is only present on the frontend
       async function onSubmit(event) {
         event.preventDefault();
+
         const messageElement = document.querySelector("#message");
         const email = document.querySelector("#UserEmail").value;
         const password = document.querySelector("#UserPassword").value;
         const firstName = document.querySelector("#UserFirstName").value;
         const lastName = document.querySelector("#UserLastName").value;
         const passwordHint = document.querySelector("#UserPasswordHint").value;
-        const secretQuestion = document.querySelector(
-          "#UserSecretQuestion"
-        ).value;
+        const secretQuestion = document.querySelector("#UserSecretQuestion")
+          .value;
         const secretAnswer = document.querySelector("#UserSecretAnswer").value;
         const country = document.querySelector("#UserCountry").value;
         const address = document.querySelector("#UserAddress").value;
@@ -253,20 +224,24 @@
 
         messageElement.innerHTML = "Loading...";
 
+        const formData = new FormData(document.querySelector("#UserSignupForm"));
+        // Convert FormData into a URL-encoded string
+        const formBody = new URLSearchParams();
+        for (const [key, value] of formData) {
+          formBody.append(key, value);
+        }
+        
         const registrationUrl = window.location.href;
-        const clientLocation = 'Narnia'; // Placeholder
+        formBody.append('clientLocation', 'Narnia'); // Placeholder
+        formBody.append('registrationUrl', registrationUrl)
+
 
         const res = await fetch("/signup", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: JSON.stringify({ 
-            // Note the lack of encryption on the password
-            email, password, firstName, lastName, passwordHint, secretQuestion,
-            secretAnswer, clientLocation, registrationUrl, country, address, city, state,
-            zip 
-          }),
+          body: formBody,
           redirect: "manual",
         });
         messageElement.innerHTML = "";
@@ -289,7 +264,7 @@
       }
 
       document
-        .querySelector("#UserLoginForm")
+        .querySelector("#UserSignupForm")
         .addEventListener("submit", onSubmit);
     </script>
   </body>

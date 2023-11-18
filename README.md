@@ -14,6 +14,9 @@ is remotely a perfect emulation of the VTech server now or at the time.
 
 No affiliation with VTech or any of its subsidiaries.
 
+**I hope this goes without saying:** please do not use this code in production. It is
+intended for educational purposes only.
+
 ## Setup
 
 1. Clone the repository
